@@ -1,0 +1,182 @@
+[
+    {
+        "id": "3e0758a1.537bc8",
+        "type": "tab",
+        "label": "Data Collection",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "cacaa723.587a78",
+        "type": "MSSQL-CN",
+        "z": "",
+        "name": "Marketplace Stage",
+        "server": "ltimosaicthings.database.windows.net",
+        "port": "3302",
+        "encyption": true,
+        "database": "MarketplaceStage",
+        "useUTC": false,
+        "connectTimeout": "",
+        "requestTimeout": "",
+        "cancelTimeout": "",
+        "pool": "",
+        "parseJSON": false
+    },
+    {
+        "id": "da4bb824.a13e08",
+        "type": "mqtt-broker",
+        "z": "",
+        "name": "mqttPatientALert",
+        "broker": "broker.mqttdashboard.com",
+        "port": "1883",
+        "clientid": "csdvfvffdfgg",
+        "usetls": false,
+        "compatmode": false,
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    },
+    {
+        "id": "39715a54.a728e6",
+        "type": "azure-event-hub-receive",
+        "z": "3e0758a1.537bc8",
+        "name": "",
+        "connectionstring": "",
+        "consumergroup": "$default",
+        "x": 180,
+        "y": 120,
+        "wires": [
+            [
+                "78c67f0a.855ff",
+                "fdb74f98.1e0c1"
+            ]
+        ]
+    },
+    {
+        "id": "c548484d.206f08",
+        "type": "MSSQL",
+        "z": "3e0758a1.537bc8",
+        "mssqlCN": "cacaa723.587a78",
+        "name": "",
+        "query": "",
+        "outField": "payload",
+        "returnType": 0,
+        "throwErrors": 1,
+        "x": 600,
+        "y": 120,
+        "wires": [
+            [
+                "497cc9ea.9bc418"
+            ]
+        ]
+    },
+    {
+        "id": "78c67f0a.855ff",
+        "type": "function",
+        "z": "3e0758a1.537bc8",
+        "name": "Insert Query",
+        "func": "\nvar data = msg.payload;\n\nvar query = `insert into telemetryData (timestamp,truckId,fuel,temperature,humidity,lat,lon)\nvalues ('${data.timestamp}',${data.truckId},${data.fuel},${data.temperature},${data.humidity},${data.lat},${data.lon});`;\n\nmsg.payload = query;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 430,
+        "y": 120,
+        "wires": [
+            [
+                "c548484d.206f08"
+            ]
+        ]
+    },
+    {
+        "id": "497cc9ea.9bc418",
+        "type": "debug",
+        "z": "3e0758a1.537bc8",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 760,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "fdb74f98.1e0c1",
+        "type": "function",
+        "z": "3e0758a1.537bc8",
+        "name": "Patient Status & Assistance Request",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 230,
+        "y": 240,
+        "wires": [
+            [
+                "d625fec6.061fd",
+                "1800f068.0ca89",
+                "cebcec01.644e7",
+                "5baef91a.c96d28"
+            ]
+        ]
+    },
+    {
+        "id": "d625fec6.061fd",
+        "type": "mqtt out",
+        "z": "3e0758a1.537bc8",
+        "name": "Patient Risk- Low",
+        "topic": "broker.mqttdashboard.com",
+        "qos": "0",
+        "retain": "false",
+        "broker": "da4bb824.a13e08",
+        "x": 620,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "1800f068.0ca89",
+        "type": "mqtt out",
+        "z": "3e0758a1.537bc8",
+        "name": "Patient Risk - Medium",
+        "topic": "patientEMergyMedium",
+        "qos": "0",
+        "retain": "false",
+        "broker": "da4bb824.a13e08",
+        "x": 620,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "cebcec01.644e7",
+        "type": "mqtt out",
+        "z": "3e0758a1.537bc8",
+        "name": "Patient Risk - High",
+        "topic": "Immediate",
+        "qos": "0",
+        "retain": "false",
+        "broker": "da4bb824.a13e08",
+        "x": 640,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "5baef91a.c96d28",
+        "type": "mqtt out",
+        "z": "3e0758a1.537bc8",
+        "name": "Patient Imediate Assistance  Request",
+        "topic": "imeditate assistance",
+        "qos": "0",
+        "retain": "",
+        "broker": "da4bb824.a13e08",
+        "x": 630,
+        "y": 480,
+        "wires": []
+    }
+]
